@@ -13,6 +13,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   @override
   void initState() {
     initialCameraPosition = const CameraPosition(
+      zoom: 19,
       target: LatLng(29.978992404450963, 31.25088978734445),
     );
     super.initState();
