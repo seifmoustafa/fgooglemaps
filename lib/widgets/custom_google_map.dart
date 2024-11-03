@@ -19,6 +19,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     super.initState();
   }
 
+  String? mapStyle;
   late GoogleMapController googleMapController;
   @override
   void dispose() {
@@ -30,8 +31,12 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   Widget build(BuildContext context) {
     return Stack(children: [
       GoogleMap(
+        style: mapStyle,
+        // mapType: MapTy pe.hybrid,
+        zoomControlsEnabled: false,
         onMapCreated: (controller) {
           googleMapController = controller;
+          initMapStyle();
         },
         initialCameraPosition: initialCameraPosition,
         // cameraTargetBounds: CameraTargetBounds(
@@ -53,5 +58,11 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
               },
               child: const Text('Change Location')))
     ]);
+  }
+
+  Future initMapStyle() async {
+    mapStyle = await DefaultAssetBundle.of(context)
+        .loadString("assets/map_styles/night_map_style.json");
+    setState(() {});
   }
 }
