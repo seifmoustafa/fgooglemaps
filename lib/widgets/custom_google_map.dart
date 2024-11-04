@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fgooglemaps/models/place_model.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class CustomGoogleMap extends StatefulWidget {
@@ -36,7 +37,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
         markers: markers,
         style: mapStyle,
         // mapType: MapTy pe.hybrid,
-        zoomControlsEnabled: false,
+        zoomControlsEnabled: true,
         onMapCreated: (controller) {
           googleMapController = controller;
           initMapStyle();
@@ -70,9 +71,16 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   }
 
   void initMarkers() {
-    var myMarker = const Marker(
-        markerId: MarkerId('1'),
-        position: LatLng(29.981408053771613, 31.25643925103204));
-    markers.add(myMarker);
+    var myMarkers = places
+        .map(
+          (placeModel) => Marker(
+            position: placeModel.latLng,
+            markerId: MarkerId(
+              placeModel.id.toString(),
+            ),
+          ),
+        )
+        .toSet();
+    markers.addAll(myMarkers);
   }
 }

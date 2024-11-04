@@ -18,11 +18,11 @@ List<PlaceModel> places = [
       name: 'كافيه',
       latLng: const LatLng(29.97450983418806, 31.23422953334269)),
   PlaceModel(
-      id: 1,
+      id: 2,
       name: 'مطعم',
       latLng: const LatLng(29.974987178732306, 31.23802323920141)),
   PlaceModel(
-      id: 1,
+      id: 3,
       name: 'مستشفي',
       latLng: const LatLng(29.977082758495513, 31.242111014282152)),
 ];
