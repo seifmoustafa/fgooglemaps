@@ -16,10 +16,10 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
       zoom: 18,
       target: LatLng(29.978992404450963, 31.25088978734445),
     );
+    initMarkers();
     super.initState();
   }
 
-  String? mapStyle;
   late GoogleMapController googleMapController;
   @override
   void dispose() {
@@ -27,10 +27,13 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     super.dispose();
   }
 
+  Set<Marker> markers = {};
+  String? mapStyle;
   @override
   Widget build(BuildContext context) {
     return Stack(children: [
       GoogleMap(
+        markers: markers,
         style: mapStyle,
         // mapType: MapTy pe.hybrid,
         zoomControlsEnabled: false,
@@ -64,5 +67,12 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     mapStyle = await DefaultAssetBundle.of(context)
         .loadString("assets/map_styles/night_map_style.json");
     setState(() {});
+  }
+
+  void initMarkers() {
+    var myMarker = const Marker(
+        markerId: MarkerId('1'),
+        position: LatLng(29.981408053771613, 31.25643925103204));
+    markers.add(myMarker);
   }
 }
