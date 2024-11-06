@@ -74,6 +74,10 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     var myMarkers = places
         .map(
           (placeModel) => Marker(
+            icon: customMarkerIcon,
+            infoWindow: InfoWindow(
+              title: placeModel.name,
+            ),
             position: placeModel.latLng,
             markerId: MarkerId(
               placeModel.id.toString(),
@@ -82,5 +86,6 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
         )
         .toSet();
     markers.addAll(myMarkers);
+    setState(() {});
   }
 }
