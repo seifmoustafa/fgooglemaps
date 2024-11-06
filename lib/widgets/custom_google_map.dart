@@ -1,4 +1,7 @@
+import 'dart:ui' as ui;
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fgooglemaps/models/place_model.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -70,7 +73,39 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     setState(() {});
   }
 
-  void initMarkers() {
+  /// Asynchronously loads an image from raw data, resizes it to the specified width,
+  /// and returns the image as a Uint8List in PNG format.
+  ///
+  /// [image] is the path to the image asset in the app's bundle.
+  /// [width] is the desired width to which the image will be resized.
+  ///
+  /// Returns a [Future<Uint8List>] containing the image data in PNG format.
+  Future<Uint8List> getImageFromRawData(String image, double width) async {
+    // Load the image data from the asset bundle.
+    var imageData = await rootBundle.load(image);
+
+    // Instantiate an image codec for the loaded image data, resizing it to the target width.
+    var imageCodec = await ui.instantiateImageCodec(
+        imageData.buffer.asUint8List(),
+        targetWidth: width.round());
+
+    // Retrieve the first frame of the image.
+    imageCodec.getNextFrame();
+
+    // Get the next frame of the image, which contains the actual image data.
+    var imageFrame = await imageCodec.getNextFrame();
+
+    // Convert the image frame to byte data in PNG format.
+    var imageBytes =
+        await imageFrame.image.toByteData(format: ui.ImageByteFormat.png);
+
+    // Return the image bytes as a Uint8List.
+    return imageBytes!.buffer.asUint8List();
+  }
+
+  void initMarkers() async {
+    var customMarkerIcon = await BitmapDescriptor.bytes(
+        await getImageFromRawData('assets/images/marker.png', 50));
     var myMarkers = places
         .map(
           (placeModel) => Marker(
