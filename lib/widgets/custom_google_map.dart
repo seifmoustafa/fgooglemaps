@@ -20,6 +20,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
       zoom: 18,
       target: LatLng(29.978992404450963, 31.25088978734445),
     );
+    initPolyLines();
     initMarkers();
     super.initState();
   }
@@ -31,12 +32,14 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     super.dispose();
   }
 
+  Set<Polyline> polyLines = {};
   Set<Marker> markers = {};
   String? mapStyle;
   @override
   Widget build(BuildContext context) {
     return Stack(children: [
       GoogleMap(
+        polylines: polyLines,
         markers: markers,
         style: mapStyle,
         // mapType: MapTy pe.hybrid,
@@ -103,6 +106,26 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     return imageBytes!.buffer.asUint8List();
   }
 
+  /// Initializes and adds custom markers to the map.
+  ///
+  /// This method retrieves a custom marker icon from the specified asset
+  /// and creates a set of markers based on the provided `places` list.
+  /// Each marker is associated with a specific place, identified by its
+  /// unique ID, and includes an info window that displays the place's name.
+  ///
+  /// The method performs the following steps:
+  /// 1. Loads a custom marker icon from the assets.
+  /// 2. Maps over the `places` list to create a set of markers.
+  /// 3. Each marker is created with the following properties:
+  ///    - `icon`: The custom marker icon.
+  ///    - `infoWindow`: An info window containing the title of the place.
+  ///    - `position`: The geographical coordinates of the place.
+  ///    - `markerId`: A unique identifier for the marker based on the place's ID.
+  /// 4. Adds the created markers to the `markers` set.
+  /// 5. Calls `setState` to update the UI.
+  ///
+  /// This method is asynchronous and should be awaited if called from an
+  /// async context.
   void initMarkers() async {
     var customMarkerIcon = await BitmapDescriptor.bytes(
         await getImageFromRawData('assets/images/marker.png', 50));
@@ -122,5 +145,49 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
         .toSet();
     markers.addAll(myMarkers);
     setState(() {});
+  }
+
+  /// Initializes and adds a polyline to the map.
+  ///
+  /// This method creates a polyline that represents a series of connected
+  /// geographical points. The polyline is defined by specific properties,
+  /// including its appearance and the coordinates of its points.
+  ///
+  /// The method performs the following steps:
+  /// 1. Creates a new Polyline object with the following properties:
+  ///    - `geodesic`: Indicates that the polyline should follow the curvature
+  ///      of the Earth.
+  ///    - `width`: Sets the width of the polyline in pixels.
+  ///    - `startCap`: Defines the style of the starting cap of the polyline,
+  ///      in this case, a rounded cap.
+  ///    - `color`: Specifies the color of the polyline, which is red in this
+  ///      instance.
+  ///    - `polylineId`: Assigns a unique identifier for the polyline ('1').
+  ///    - `points`: A list of geographical coordinates (LatLng) that define
+  ///      the shape of the polyline.
+  /// 2. Adds the created polyline to the existing collection of polylines
+  ///    (polyLines).
+  void initPolyLines() {
+    // Create a new Polyline object with the specified properties.
+    Polyline polyline = const Polyline(
+      geodesic:
+          true, // Indicates that the polyline follows the curvature of the Earth.
+      width: 5, // The width of the polyline in pixels.
+      startCap: Cap.roundCap, // The style of the starting cap of the polyline.
+      color: Colors.red, // The color of the polyline.
+      polylineId: PolylineId('1'), // Unique identifier for the polyline.
+
+      // List of geographical points (LatLng) that define the shape of the polyline.
+      points: [
+        LatLng(29.978893629559657, 31.25116592286826), // First point
+        LatLng(29.979215990242274, 31.250854668366852), // Second point
+        LatLng(29.978682628650144, 31.251637313264673), // Third point
+        LatLng(29.97801837046042, 31.251057661114288), // Fourth point
+        LatLng(29.97926873389208, 31.249720164501063), // Fifth point
+      ],
+    );
+
+    // Add the created polyline to the collection of polylines.
+    polyLines.add(polyline);
   }
 }
