@@ -12,49 +12,64 @@ class CustomGoogleMap extends StatefulWidget {
   State<CustomGoogleMap> createState() => _CustomGoogleMapState();
 }
 
+/// CustomGoogleMap is a widget that displays a Google Map with custom markers,
+/// polylines, and polygons. It allows the user to change the map's location
+/// through a button.
 class _CustomGoogleMapState extends State<CustomGoogleMap> {
+  /// The initial camera position of the Google Map.
   late CameraPosition initialCameraPosition;
+
   @override
   void initState() {
+    super.initState();
+    // Set the initial camera position with a specific zoom level and target coordinates.
     initialCameraPosition = const CameraPosition(
       zoom: 18,
       target: LatLng(29.978992404450963, 31.25088978734445),
     );
     initPolyLines();
     initMarkers();
-    super.initState();
+    initPolygons();
   }
 
+  /// The controller for managing the Google Map.
   late GoogleMapController googleMapController;
+
   @override
   void dispose() {
+    // Dispose of the Google Map controller when the widget is removed from the widget tree.
     googleMapController.dispose();
     super.dispose();
   }
 
+  /// A set of polylines to be drawn on the map.
   Set<Polyline> polyLines = {};
+
+  /// A set of polygons to be drawn on the map.
+  Set<Polygon> polygons = {};
+
+  /// A set of markers to be displayed on the map.
   Set<Marker> markers = {};
+
+  /// The style of the map, which can be customized.
   String? mapStyle;
+
   @override
   Widget build(BuildContext context) {
+    // Build the Google Map widget with specified properties.
     return Stack(children: [
       GoogleMap(
+        polygons: polygons,
         polylines: polyLines,
         markers: markers,
         style: mapStyle,
-        // mapType: MapTy pe.hybrid,
-        zoomControlsEnabled: true,
+        zoomControlsEnabled: false,
         onMapCreated: (controller) {
+          // Initialize the Google Map controller and set the map style.
           googleMapController = controller;
           initMapStyle();
         },
         initialCameraPosition: initialCameraPosition,
-        // cameraTargetBounds: CameraTargetBounds(
-        //   LatLngBounds(
-        //     southwest: const LatLng(29.977119405274014, 31.249217375163916),
-        //     northeast: const LatLng(29.98138624646672, 31.256507255830215),
-        //   ),
-        // ),
       ),
       Positioned(
           bottom: 16,
@@ -62,6 +77,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
           right: 16,
           child: ElevatedButton(
               onPressed: () {
+                // Animate the camera to a new location when the button is pressed.
                 googleMapController.animateCamera(CameraUpdate.newLatLng(
                     const LatLng(29.981408053771613, 31.25643925103204)));
                 setState(() {});
@@ -70,6 +86,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     ]);
   }
 
+  /// Initializes the map style by loading it from an asset file.
   Future initMapStyle() async {
     mapStyle = await DefaultAssetBundle.of(context)
         .loadString("assets/map_styles/night_map_style.json");
@@ -189,5 +206,53 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
 
     // Add the created polyline to the collection of polylines.
     polyLines.add(polyline);
+  }
+
+  /// Initializes and adds a polygon to the collection of polygons.
+  ///
+  /// This function creates a new instance of a `Polygon` with specified properties,
+  /// including its vertices (points), holes, stroke width, fill color, and a unique
+  /// identifier. The polygon is then added to the `polygons` collection for rendering
+  /// on a map.
+  ///
+  /// The polygon represents a specific geographical area defined by its vertices,
+  /// and it includes a hole that represents an area that is not part of the polygon.
+  ///
+  /// The vertices and holes are defined using latitude and longitude coordinates
+  /// (LatLng objects). The fill color is set to a semi-transparent black, and the
+  /// stroke width is set to 3 pixels.
+  ///
+  /// Example usage:
+  /// ```dart
+  /// initPolygons();
+  /// ```
+  ///
+  /// Note: Ensure that the `polygons` collection is initialized before calling this
+  /// function.
+  ///
+  /// See also:
+  /// - [Polygon] for more details on polygon properties.
+  /// - [LatLng] for information on latitude and longitude representation.
+  void initPolygons() {
+    Polygon polygon = Polygon(
+      holes: const [
+        [
+          LatLng(29.97904848522165, 31.251212787795257),
+          LatLng(29.9787832416292, 31.25133239995366),
+          LatLng(29.97880120293013, 31.250546140019658),
+          LatLng(29.979225314992917, 31.25039941320513),
+        ]
+      ],
+      strokeWidth: 3,
+      fillColor: Colors.black.withOpacity(.5),
+      polygonId: const PolygonId('1'),
+      points: const [
+        LatLng(29.978534571809206, 31.252236681286924),
+        LatLng(29.97987460492306, 31.251560468916004),
+        LatLng(29.979305438872892, 31.249818886915723),
+        LatLng(29.978447544019765, 31.249956047749247),
+      ],
+    );
+    polygons.add(polygon);
   }
 }
