@@ -30,6 +30,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     initPolyLines();
     initMarkers();
     initPolygons();
+    initCircles();
   }
 
   /// The controller for managing the Google Map.
@@ -41,6 +42,10 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     googleMapController.dispose();
     super.dispose();
   }
+
+  /// A set of circles to be drawn on the map.
+
+  Set<Circle> circles = {};
 
   /// A set of polylines to be drawn on the map.
   Set<Polyline> polyLines = {};
@@ -59,6 +64,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     // Build the Google Map widget with specified properties.
     return Stack(children: [
       GoogleMap(
+        circles: circles,
         polygons: polygons,
         polylines: polyLines,
         markers: markers,
@@ -255,4 +261,29 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     );
     polygons.add(polygon);
   }
+
+  /// Initializes and adds a circle to the map.
+///
+/// This function creates a `Circle` object with specified properties such as
+/// fill color, stroke color, radius, stroke width, and center location.
+/// The circle is then added to the `circles` collection for rendering on the map.
+///
+/// The circle is configured with the following parameters:
+/// - **Fill Color**: A semi-transparent red color (opacity of 0.5).
+/// - **Stroke Color**: Black color for the circle's border.
+/// - **Radius**: 200 units (the unit depends on the map's coordinate system).
+/// - **Stroke Width**: 5 units for the border thickness.
+/// - **Center**: Latitude and longitude of the circle's center (29.978576678313352, 31.248548124056367).
+/// - **Circle ID**: A unique identifier for the circle ('1').
+void initCircles() {
+    Circle bestCircle = Circle(
+      fillColor: Colors.red.withOpacity(.5),
+      strokeColor: Colors.black,
+      radius: 200,
+      strokeWidth: 5,
+      center: const LatLng(29.978576678313352, 31.248548124056367),
+      circleId: const CircleId('1'),
+    );
+    circles.add(bestCircle);
+}
 }
