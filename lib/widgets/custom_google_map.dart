@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:location/location.dart';
 import 'package:fgooglemaps/models/place_model.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -18,10 +19,9 @@ class CustomGoogleMap extends StatefulWidget {
 class _CustomGoogleMapState extends State<CustomGoogleMap> {
   /// The initial camera position of the Google Map.
   late CameraPosition initialCameraPosition;
-
+  late Location location;
   @override
   void initState() {
-    super.initState();
     // Set the initial camera position with a specific zoom level and target coordinates.
     initialCameraPosition = const CameraPosition(
       zoom: 18,
@@ -31,6 +31,9 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     initMarkers();
     initPolygons();
     initCircles();
+    location = Location();
+    checkAndRequestLocationService();
+    super.initState();
   }
 
   /// The controller for managing the Google Map.
@@ -263,19 +266,19 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   }
 
   /// Initializes and adds a circle to the map.
-///
-/// This function creates a `Circle` object with specified properties such as
-/// fill color, stroke color, radius, stroke width, and center location.
-/// The circle is then added to the `circles` collection for rendering on the map.
-///
-/// The circle is configured with the following parameters:
-/// - **Fill Color**: A semi-transparent red color (opacity of 0.5).
-/// - **Stroke Color**: Black color for the circle's border.
-/// - **Radius**: 200 units (the unit depends on the map's coordinate system).
-/// - **Stroke Width**: 5 units for the border thickness.
-/// - **Center**: Latitude and longitude of the circle's center (29.978576678313352, 31.248548124056367).
-/// - **Circle ID**: A unique identifier for the circle ('1').
-void initCircles() {
+  ///
+  /// This function creates a `Circle` object with specified properties such as
+  /// fill color, stroke color, radius, stroke width, and center location.
+  /// The circle is then added to the `circles` collection for rendering on the map.
+  ///
+  /// The circle is configured with the following parameters:
+  /// - **Fill Color**: A semi-transparent red color (opacity of 0.5).
+  /// - **Stroke Color**: Black color for the circle's border.
+  /// - **Radius**: 200 units (the unit depends on the map's coordinate system).
+  /// - **Stroke Width**: 5 units for the border thickness.
+  /// - **Center**: Latitude and longitude of the circle's center (29.978576678313352, 31.248548124056367).
+  /// - **Circle ID**: A unique identifier for the circle ('1').
+  void initCircles() {
     Circle bestCircle = Circle(
       fillColor: Colors.red.withOpacity(.5),
       strokeColor: Colors.black,
@@ -285,5 +288,15 @@ void initCircles() {
       circleId: const CircleId('1'),
     );
     circles.add(bestCircle);
-}
+  }
+
+  void checkAndRequestLocationService() async {
+    var isServiceEnabled = await location.serviceEnabled();
+    if (!isServiceEnabled) {
+    isServiceEnabled=  await location.requestService();
+    if(!isServiceEnabled){
+      
+    }
+    }
+  }
 }
