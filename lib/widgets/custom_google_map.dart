@@ -293,10 +293,29 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   void checkAndRequestLocationService() async {
     var isServiceEnabled = await location.serviceEnabled();
     if (!isServiceEnabled) {
-    isServiceEnabled=  await location.requestService();
-    if(!isServiceEnabled){
-      
+      isServiceEnabled = await location.requestService();
+      if (!isServiceEnabled) {
+        const ScaffoldMessenger(
+          child: SnackBar(
+            content: Text('We need the permission bro!'),
+          ),
+        );
+      }
     }
+    checkAndRequestLocationPermission();
+  }
+
+  void checkAndRequestLocationPermission() async {
+    var permissionStatus = await location.hasPermission();
+    if (permissionStatus == PermissionStatus.denied) {
+      permissionStatus = await location.requestPermission();
+      if (permissionStatus != PermissionStatus.granted) {
+        const ScaffoldMessenger(
+          child: SnackBar(
+            content: Text('We need the permission bro!'),
+          ),
+        );
+      }
     }
   }
 }
