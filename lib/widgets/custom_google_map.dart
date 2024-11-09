@@ -38,12 +38,12 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   }
 
   /// The controller for managing the Google Map.
-  late GoogleMapController googleMapController;
+  GoogleMapController? googleMapController;
 
   @override
   void dispose() {
     // Dispose of the Google Map controller when the widget is removed from the widget tree.
-    googleMapController.dispose();
+    googleMapController!.dispose();
     super.dispose();
   }
 
@@ -88,7 +88,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
           child: ElevatedButton(
               onPressed: () {
                 // Animate the camera to a new location when the button is pressed.
-                googleMapController.animateCamera(CameraUpdate.newLatLng(
+                googleMapController!.animateCamera(CameraUpdate.newLatLng(
                     const LatLng(29.981408053771613, 31.25643925103204)));
                 setState(() {});
               },
@@ -327,7 +327,12 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   }
 
   void getlocationData() {
-    location.onLocationChanged.listen((locationData) {});
+    location.onLocationChanged.listen((locationData) {
+      var cameraPosition = CameraPosition(
+          target: LatLng(locationData.latitude!, locationData.longitude!));
+      googleMapController
+          ?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+    });
   }
 
   void updateMyLocation() async {
