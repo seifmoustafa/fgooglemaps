@@ -77,6 +77,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
           // Initialize the Google Map controller and set the map style.
           googleMapController = controller;
           initMapStyle();
+          location.onLocationChanged.listen((locationData){});
         },
         initialCameraPosition: initialCameraPosition,
       ),
