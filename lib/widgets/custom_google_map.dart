@@ -31,8 +31,9 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     initMarkers();
     initPolygons();
     initCircles();
+    updateMyLocation();
     location = Location();
-    checkAndRequestLocationService();
+
     super.initState();
   }
 
@@ -77,7 +78,6 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
           // Initialize the Google Map controller and set the map style.
           googleMapController = controller;
           initMapStyle();
-          location.onLocationChanged.listen((locationData){});
         },
         initialCameraPosition: initialCameraPosition,
       ),
@@ -291,7 +291,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     circles.add(bestCircle);
   }
 
-  void checkAndRequestLocationService() async {
+  Future<void> checkAndRequestLocationService() async {
     var isServiceEnabled = await location.serviceEnabled();
     if (!isServiceEnabled) {
       isServiceEnabled = await location.requestService();
@@ -303,11 +303,13 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
         );
       }
     }
-    checkAndRequestLocationPermission();
   }
 
-  void checkAndRequestLocationPermission() async {
+  Future<bool> checkAndRequestLocationPermission() async {
     var permissionStatus = await location.hasPermission();
+    if (permissionStatus == PermissionStatus.deniedForever) {
+      return false;
+    }
     if (permissionStatus == PermissionStatus.denied) {
       permissionStatus = await location.requestPermission();
       if (permissionStatus != PermissionStatus.granted) {
@@ -316,7 +318,23 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
             content: Text('We need the permission bro!'),
           ),
         );
+        return false;
       }
+    } else {
+      return true;
+    }
+    return true;
+  }
+
+  void getlocationData() {
+    location.onLocationChanged.listen((locationData) {});
+  }
+
+  void updateMyLocation() async {
+    await checkAndRequestLocationService();
+    var hasPermission = await checkAndRequestLocationPermission();
+    if (hasPermission) {
+      getlocationData();
     }
   }
 }
