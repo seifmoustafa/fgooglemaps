@@ -291,7 +291,12 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     circles.add(bestCircle);
   }
 
-  Future<void> checkAndRequestLocationService() async {
+ /// Checks if the location service is enabled on the device.
+/// If the service is not enabled, it requests the user to enable it.
+/// Displays a SnackBar if the permission is denied.
+///
+/// This method is asynchronous and returns a [Future<void>].
+Future<void> checkAndRequestLocationService() async {
     var isServiceEnabled = await location.serviceEnabled();
     if (!isServiceEnabled) {
       isServiceEnabled = await location.requestService();
@@ -303,9 +308,15 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
         );
       }
     }
-  }
+}
 
-  Future<bool> checkAndRequestLocationPermission() async {
+/// Checks if the location permission is granted.
+/// If permission is denied, it requests the user for permission.
+/// Returns false if permission is denied forever or if the user does not grant permission.
+/// Returns true if permission is already granted or granted after the request.
+///
+/// This method is asynchronous and returns a [Future<bool>].
+Future<bool> checkAndRequestLocationPermission() async {
     var permissionStatus = await location.hasPermission();
     if (permissionStatus == PermissionStatus.deniedForever) {
       return false;
@@ -324,22 +335,31 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
       return true;
     }
     return true;
-  }
+}
 
-  void getlocationData() {
+/// Listens for location changes and updates the camera position on the map
+/// to the new location whenever it changes.
+///
+/// This method does not return a value.
+void getlocationData() {
     location.onLocationChanged.listen((locationData) {
       var cameraPosition = CameraPosition(
           target: LatLng(locationData.latitude!, locationData.longitude!));
       googleMapController
           ?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
     });
-  }
+}
 
-  void updateMyLocation() async {
+/// Updates the user's location by checking and requesting the necessary
+/// location service and permission. If permission is granted, it starts
+/// listening for location updates.
+///
+/// This method is asynchronous and does not return a value.
+void updateMyLocation() async {
     await checkAndRequestLocationService();
     var hasPermission = await checkAndRequestLocationPermission();
     if (hasPermission) {
       getlocationData();
     }
-  }
+}
 }
