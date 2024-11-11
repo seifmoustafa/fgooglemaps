@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:location/location.dart';
 import 'package:fgooglemaps/models/place_model.dart';
+import 'package:fgooglemaps/utils/location_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class CustomGoogleMap extends StatefulWidget {
@@ -19,12 +20,13 @@ class CustomGoogleMap extends StatefulWidget {
 class _CustomGoogleMapState extends State<CustomGoogleMap> {
   /// The initial camera position of the Google Map.
   late CameraPosition initialCameraPosition;
+  late LocationService locationService;
   late Location location;
   @override
   void initState() {
     // Set the initial camera position with a specific zoom level and target coordinates.
     initialCameraPosition = const CameraPosition(
-      zoom: 18,
+      zoom: 5,
       target: LatLng(29.978992404450963, 31.25088978734445),
     );
     initPolyLines();
@@ -32,11 +34,13 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     initPolygons();
     initCircles();
     location = Location();
-
+    locationService = LocationService();
     updateMyLocation();
 
     super.initState();
   }
+
+  bool isFirstCall = true;
 
   /// The controller for managing the Google Map.
   GoogleMapController? googleMapController;
@@ -292,87 +296,68 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     circles.add(bestCircle);
   }
 
-  /// Checks if the location service is enabled on the device.
-  /// If the service is not enabled, it requests the user to enable it.
-  /// Displays a SnackBar if the permission is denied.
-  ///
-  /// This method is asynchronous and returns a [Future<void>].
-  Future<void> checkAndRequestLocationService() async {
-    var isServiceEnabled = await location.serviceEnabled();
-    if (!isServiceEnabled) {
-      isServiceEnabled = await location.requestService();
-      if (!isServiceEnabled) {
-        const ScaffoldMessenger(
-          child: SnackBar(
-            content: Text('We need the permission bro!'),
-          ),
-        );
-      }
+  /// Updates the user's current location by checking and requesting
+  /// necessary location services and permissions. If granted, it
+  /// retrieves real-time location data and updates the map's camera
+  /// position and marker accordingly.
+  void updateMyLocation() async {
+    // Check and request location service availability.
+    await locationService.checkAndRequestLocationService();
+
+    // Check and request location permission from the user.
+    var hasPermission =
+        await locationService.checkAndRequestLocationPermission();
+
+    // If permission is granted, get real-time location data.
+    if (hasPermission) {
+      locationService.getRealTimeLocationData((locationData) {
+        // Set the user's location marker on the map.
+        setMyLocationMarker(locationData);
+        // Update the camera position to the user's current location.
+        setMyCameraPosition(locationData);
+      });
     }
   }
 
-  /// Checks if the location permission is granted.
-  /// If permission is denied, it requests the user for permission.
-  /// Returns false if permission is denied forever or if the user does not grant permission.
-  /// Returns true if permission is already granted or granted after the request.
+  /// Sets the camera position on the map to the user's current location.
   ///
-  /// This method is asynchronous and returns a [Future<bool>].
-  Future<bool> checkAndRequestLocationPermission() async {
-    var permissionStatus = await location.hasPermission();
-    if (permissionStatus == PermissionStatus.deniedForever) {
-      return false;
-    }
-    if (permissionStatus == PermissionStatus.denied) {
-      permissionStatus = await location.requestPermission();
-      if (permissionStatus != PermissionStatus.granted) {
-        const ScaffoldMessenger(
-          child: SnackBar(
-            content: Text('We need the permission bro!'),
-          ),
-        );
-        return false;
-      }
-    } else {
-      return true;
-    }
-    return true;
-  }
-
-  /// Listens for location changes and updates the camera position on the map
-  /// to the new location whenever it changes.
-  ///
-  /// This method does not return a value.
-  void getlocationData() {
-    location.changeSettings(
-      distanceFilter: 2,
-    );
-    location.onLocationChanged.listen((locationData) {
+  /// [locationData] contains the latitude and longitude of the user's
+  /// current location, which will be used to update the camera's target.
+  void setMyCameraPosition(LocationData locationData) {
+    if (isFirstCall) {
       var cameraPosition = CameraPosition(
-        zoom: 15,
+        zoom: 17, // Set the zoom level for the camera.
         target: LatLng(locationData.latitude!, locationData.longitude!),
       );
-      var myLocationMarker = Marker(
-        markerId: const MarkerId('my_location_marker'),
-        position: LatLng(locationData.latitude!, locationData.latitude!),
+      googleMapController?.animateCamera(
+        CameraUpdate.newCameraPosition(cameraPosition),
       );
-      markers.add(myLocationMarker);
-      setState(() {});
+      isFirstCall = false;
+    } else {
+      googleMapController?.animateCamera(
+        CameraUpdate.newLatLng(
+          LatLng(locationData.latitude!, locationData.longitude!),
+        ),
+      );
+    }
 
-      googleMapController
-          ?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
-    });
+    // Animate the camera to the new position.
+   
   }
 
-  /// Updates the user's location by checking and requesting the necessary
-  /// location service and permission. If permission is granted, it starts
-  /// listening for location updates.
+  /// Sets a marker on the map at the user's current location.
   ///
-  /// This method is asynchronous and does not return a value.
-  void updateMyLocation() async {
-    await checkAndRequestLocationService();
-    var hasPermission = await checkAndRequestLocationPermission();
-    if (hasPermission) {
-      getlocationData();
-    }
+  /// [locationData] contains the latitude and longitude of the user's
+  /// current location, which will be used to place the marker on the map.
+  void setMyLocationMarker(LocationData locationData) {
+    var myLocationMarker = Marker(
+      markerId:
+          const MarkerId('my_location_marker'), // Unique ID for the marker.
+      position: LatLng(locationData.latitude!,
+          locationData.latitude!), // Position of the marker.
+    );
+
+    markers.add(myLocationMarker); // Add the marker to the list of markers.
+    setState(() {}); // Update the UI to reflect the new marker.
   }
 }
