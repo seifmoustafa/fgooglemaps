@@ -82,18 +82,18 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
         },
         initialCameraPosition: initialCameraPosition,
       ),
-      Positioned(
-          bottom: 16,
-          left: 16,
-          right: 16,
-          child: ElevatedButton(
-              onPressed: () {
-                // Animate the camera to a new location when the button is pressed.
-                googleMapController!.animateCamera(CameraUpdate.newLatLng(
-                    const LatLng(29.981408053771613, 31.25643925103204)));
-                setState(() {});
-              },
-              child: const Text('Change Location')))
+      // Positioned(
+      //     bottom: 16,
+      //     left: 16,
+      //     right: 16,
+      //     child: ElevatedButton(
+      //         onPressed: () {
+      //           // Animate the camera to a new location when the button is pressed.
+      //           googleMapController!.animateCamera(CameraUpdate.newLatLng(
+      //               const LatLng(29.981408053771613, 31.25643925103204)));
+      //           setState(() {});
+      //         },
+      //         child: const Text('Change Location')))
     ]);
   }
 
@@ -343,11 +343,21 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   ///
   /// This method does not return a value.
   void getlocationData() {
+    location.changeSettings(
+      distanceFilter: 2,
+    );
     location.onLocationChanged.listen((locationData) {
       var cameraPosition = CameraPosition(
-        zoom: 16,
+        zoom: 15,
         target: LatLng(locationData.latitude!, locationData.longitude!),
       );
+      var myLocationMarker = Marker(
+        markerId: const MarkerId('my_location_marker'),
+        position: LatLng(locationData.latitude!, locationData.latitude!),
+      );
+      markers.add(myLocationMarker);
+      setState(() {});
+
       googleMapController
           ?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
     });
