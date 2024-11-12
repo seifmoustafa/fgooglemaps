@@ -159,7 +159,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   /// This method is asynchronous and should be awaited if called from an
   /// async context.
   void initMarkers() async {
-    var customMarkerIcon = await BitmapDescriptor.bytes(
+    var customMarkerIcon = BitmapDescriptor.bytes(
         await getImageFromRawData('assets/images/marker.png', 50));
     var myMarkers = places
         .map(
@@ -340,9 +340,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
         ),
       );
     }
-
     // Animate the camera to the new position.
-   
   }
 
   /// Sets a marker on the map at the user's current location.
